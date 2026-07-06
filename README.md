@@ -49,6 +49,17 @@ optimism with a census.
 | Framework → framework | "Same language, so it's mostly renaming" — the rendering model, reactivity model, and ecosystem compatibility are the real migration |
 | Standalone → as-a-service | Treating it as a deployment change when it's a data-model and security change (multi-tenancy, isolation, authn/z, ops you now own) |
 | Vanilla → framework | Adopting the letter but not the inversion of control — two architectures forever |
+| Major version upgrade (Vue 2→3, Python 2→3) | "Change the number" — a major with a broken plugin ecosystem is a port in disguise |
+| Monolith ↔ microservices | The distributed monolith; "for scale" with no measured bottleneck |
+| Database / storage migration | "SQL is SQL" — dialects, engine-shaped access patterns, zero-downtime math |
+| Hosting / runtime (cloud, containers, serverless) | Lift-and-shift billed as transformation; serverless for workloads that hate it |
+| Sync → async / event-driven | Same coupling, now with queues — and eventual consistency shipped to users |
+| API paradigm (REST → GraphQL/gRPC) | N+1 resolvers, per-field authz, clients you forgot existed |
+| UI platform shift (desktop ↔ web ↔ mobile) | Estimating the UI rewrite while the cost hides in toolkit-entangled logic |
+
+Each type in the catalog carries a **feasibility profile** — the signals
+that usually decide GO vs NO-GO — so the verdict starts from priors, not
+from a blank page.
 
 And the question behind all of them — **"is it worth it?"** — gets an
 explicit break-even test in the verdict: the concrete benefit in the
