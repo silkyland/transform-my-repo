@@ -5,8 +5,9 @@ transformations — allowed to tell you "don't".**
 
 `transform-my-repo` is an [agent skill](https://vercel.com/docs/agent-resources/skills)
 for the big, scary changes: porting to another language (PHP→Python,
-Rust→Go, Assembly→C#), re-platforming standalone software as a service, or
-adopting a framework in a vanilla codebase. Migrations die from optimism —
+Rust→Go, Assembly→C#), migrating between frameworks (Vue→Next.js, React
+SPA→Next.js), re-platforming standalone software as a service, or adopting
+a framework in a vanilla codebase. Migrations die from optimism —
 the equivalent library that doesn't exist, the runtime behavior nobody knew
 was load-bearing, the big-bang rewrite that never ships. This skill replaces
 optimism with a census.
@@ -45,8 +46,15 @@ optimism with a census.
 | Type | The trap it guards against |
 |------|---------------------------|
 | Language/stack port | Assuming semantic equivalence (runtime model, typing, numerics, error idioms) |
+| Framework → framework | "Same language, so it's mostly renaming" — the rendering model, reactivity model, and ecosystem compatibility are the real migration |
 | Standalone → as-a-service | Treating it as a deployment change when it's a data-model and security change (multi-tenancy, isolation, authn/z, ops you now own) |
 | Vanilla → framework | Adopting the letter but not the inversion of control — two architectures forever |
+
+And the question behind all of them — **"is it worth it?"** — gets an
+explicit break-even test in the verdict: the concrete benefit in the
+driver's own unit, the cheaper do-nothing alternative, and roughly when
+cumulative benefit passes the one-time cost. "We can migrate" and "we
+should" are different answers.
 
 Combined transformations (port **and** SaaS-ify) are sequenced, not stacked —
 a parity harness can't isolate which change broke behavior when both move at once.

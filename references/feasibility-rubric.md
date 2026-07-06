@@ -20,6 +20,31 @@ Output: table ranked hardest-first, each row with its worst factor named.
 The **"what's hard" answer** = the top rows + every census entry marked
 `missing`.
 
+## The worth-it test (break-even)
+
+Difficulty says what the migration costs; this says whether it buys
+anything. Answer all three before the verdict — against the **do-nothing
+baseline** (keep the current stack, spend the same effort improving it):
+
+1. **What does the driver gain, concretely?** Name the benefit in the
+   driver's own unit: "SSR fixes the SEO/TTFB problem on these 12 routes",
+   "hiring pool: N× more candidates locally", "removes the license fee".
+   "More modern" is not a unit. If the benefit can't be named, the verdict
+   is NO-GO by default.
+2. **Could the driver be served WITHOUT migrating, cheaper?** e.g. SEO via
+   prerendering on the current stack; performance via profiling the hot
+   path; one painful module extracted instead of a full port. If yes and
+   the user hasn't rejected it, that alternative IS the recommendation.
+3. **Where is break-even?** Benefit is usually per-month (velocity, infra
+   cost, conversions); cost is one-time (heatmap total) plus any new
+   running cost the target adds (e.g. SPA-on-CDN → server runtime you now
+   operate). State roughly when cumulative benefit passes cost — "never"
+   or "years out, driver may not survive that long" is a NO-GO signal even
+   when the migration is technically easy.
+
+Write the three answers into the verdict section — they are the difference
+between "we can migrate" and "we should".
+
 ## Verdict rules
 
 Compute first:

@@ -1,6 +1,6 @@
 # Transformation Catalog
 
-The three transformation types, each with the extra checks it adds on top
+The four transformation types, each with the extra checks it adds on top
 of the core workflow. Combinations multiply risk — recommend sequencing
 (one transformation, stabilize, then the next), and say so in the verdict.
 
@@ -63,6 +63,41 @@ control — ending up with two architectures forever. Extra checks:
   finishes strangling and the repo carries both styles permanently.
 - Migration order: framework's outer shell first (routing/bootstrap), then
   pull modules in one by one behind the same URLs, parity-tested.
+
+## Type D — Framework → framework (Vue→Next.js, React SPA→Next.js, Angular→Svelte, …)
+
+The trap: "same language, so it's mostly renaming." The language survives;
+the *model* doesn't. Extra checks:
+
+- **Rendering model shift — usually the real migration:** CSR SPA →
+  SSR/SSG/RSC changes *where* code runs. Census every browser-only
+  assumption: `window`/`document` access at module scope, client-side data
+  fetching in lifecycle hooks, auth kept in localStorage, code that assumes
+  it runs exactly once per session (`file:line` each). Hydration
+  mismatches and server/client boundaries are the top bug source — every
+  component gets classified: server-safe / client-only / needs-splitting.
+- **Component & reactivity model translation:** Vue reactivity
+  (refs/computed/watchers) vs React hooks vs signals are NOT mechanical
+  rewrites — census the patterns in use (watchers with side effects,
+  v-model two-way binding, slots vs children/render-props, provide/inject
+  vs context) and name the target idiom for each.
+- **Routing & data paradigm:** file-based vs config routing, loaders/server
+  functions vs client fetching, middleware/guards translation. Route
+  inventory with per-route rendering strategy (static/SSR/client) is part
+  of the census.
+- **Ecosystem overlap is NOT coverage:** same npm registry, different
+  compatibility — UI libraries, plugins, and state managers are often
+  framework-bound (a Vue component library has zero React coverage).
+  Run the full Step 2 census; do not skip it because "it's all JavaScript".
+- **State management:** global stores (Vuex/Pinia/Redux) may need
+  re-architecting when the server renders — what state is per-request vs
+  per-client vs shared?
+- **Build/deploy model:** SPA-on-CDN → a Node/edge runtime you now operate
+  (or a platform bill). This lands in the worth-it test, not a footnote.
+- **Incremental path:** page-by-page coexistence behind a proxy/rewrites
+  (both apps serve the same domain during migration) is usually viable —
+  verify the target supports it (cite docs) and make it the default
+  strategy over a big-bang rewrite of all routes.
 
 ## Sequencing combined transformations
 

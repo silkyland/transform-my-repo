@@ -3,14 +3,17 @@ name: transform-my-repo
 description: >-
   Feasibility analysis and migration strategy for architecture
   transformations: porting to another language (PHP to Python, Rust to Go),
+  migrating between frameworks (Vue to Next.js, React SPA to Next.js),
   re-platforming standalone software as a service, or adopting a framework
   in a vanilla codebase. Produces an evidence-based GO/PARTIAL/NO-GO verdict
-  (a dependency census verified against the target ecosystem, semantic gap
-  analysis, per-module difficulty heatmap), then a migration roadmap with
-  behavioral parity gates and rollback points. Allowed to recommend NOT
-  migrating. Use when the user asks to migrate, port, rewrite in another
-  language or stack, convert to SaaS/multi-tenant, adopt a framework,
-  re-platform, or mentions transform-my-repo or /transform-my-repo.
+  with an explicit worth-it test against the do-nothing baseline (dependency
+  census verified against the target ecosystem, semantic gap analysis,
+  per-module difficulty heatmap), then a migration roadmap with behavioral
+  parity gates and rollback points. Allowed to recommend NOT migrating. Use
+  when the user asks to migrate, port, rewrite in another language, stack,
+  or framework, asks whether a migration is worth it, convert to
+  SaaS/multi-tenant, re-platform, or mentions transform-my-repo or
+  /transform-my-repo.
 license: MIT
 argument-hint: "[source → target] [project-root] [driver/reason]"
 ---
