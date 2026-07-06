@@ -105,6 +105,11 @@ Rules:
   language, change approach, or verdict-blocker.
 - Verify the target's runtime model actually serves the driver (e.g. if the
   driver is performance, find benchmarks or write a spike — do not assume).
+- **No web access in this session?** Degrade honestly: verify what local
+  evidence allows (installed target toolchains, lockfiles, vendored source,
+  offline docs), tag everything else `UNVERIFIED — needs web check`, and
+  say plainly that the verdict is provisional until those are checked.
+  Never fill the Evidence column from memory.
 
 ## Step 3 — Gap analysis and difficulty heatmap
 
