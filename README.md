@@ -1,3 +1,5 @@
+![transform-my-repo social preview](assets/social-preview.png)
+
 # transform-my-repo
 
 **Evidence-based feasibility and migration strategy for architecture
