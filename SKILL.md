@@ -214,7 +214,8 @@ Two roadmap non-negotiables:
 ## Step 7 — Self-check and report
 
 - Every target-ecosystem claim has URL + version. Every source claim has
-  `file:line`. Zero "surely the target has this".
+  `file:line`. Zero "surely the target has this" — grep the document for
+  `UNVERIFIED` and verify the count matches section 10.
 - Every Step 0 feasibility question is answered with evidence or listed as
   `UNVERIFIED` in the document — and every surviving `UNVERIFIED`/`missing`
   entry has a named spike task first in the phase that depends on it.
@@ -231,3 +232,14 @@ Two roadmap non-negotiables:
 - The user could hand Phase 1 of the roadmap to deep-plan right now.
 - Report: verdict, top 3 hardest things (per the heatmap), missing
   equivalents, and the recommended first slice.
+
+## When things go wrong
+
+| Situation | Response |
+|-----------|----------|
+| Target ecosystem unreachable (no web access) | Degrade honestly (Step 2): verify what local evidence allows (installed toolchains, lockfiles, vendored source, offline docs), tag everything else `UNVERIFIED — needs web check`, state plainly verdict is provisional. Never fill Evidence column from memory. |
+| Dependency has no target equivalent and no acceptable workaround | Missing entry becomes headline finding (Step 2). Realistic options: write it yourself (estimate), keep sidecar in source language, change approach, or verdict-blocker. If blocker touches core → NO-GO. |
+| User cannot respond to Verdict Brief (headless/CI run) | Degrade honestly (Step 4): on GO/PARTIAL continue but tag verdict `UNCONFIRMED — awaiting user` in document; on NO-GO write assessment with strategy/roadmap marked "not applicable — NO-GO". Never design migration nobody approved. |
+| Feasibility question remains unanswered after Step 3 | Tag `UNVERIFIED` explicitly (Step 0 rule), list in document section 10, create named timeboxed spike task FIRST in the phase that depends on it (Step 6). No unknown may sit silently under a migration phase. |
+| ONE-WAY cutover action needed but user unavailable for confirmation | Mark `UNCONFIRMED` in document (Step 5). Carry into roadmap phase with confirmation status visible. Never execute destructive action without explicit user sign-off. |
+| Migration stalls at 60%, both stacks running forever | Classic risk — gets explicit trigger and answer in risk register (Step 6). Define DONE criterion up front (e.g. "no direct mysqli_query outside repository layer"); strangler must finish strangling. |
