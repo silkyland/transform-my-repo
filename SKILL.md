@@ -44,13 +44,13 @@ Copy this into your response and check items off:
 
 ```
 Transform Progress:
-- [ ] Step 0: Frame — source → target, driver, constraints, non-goals
-- [ ] Step 1: Source census — inventory + platform couplings + dependency list
+- [ ] Step 0: Frame — source → target, driver, constraints, non-goals, feasibility questions
+- [ ] Step 1: Source census — inventory + dependency, platform-coupling, operational censuses
 - [ ] Step 2: Target ground truth — every dependency & mechanism verified in target ecosystem
 - [ ] Step 3: Gap analysis — semantic gaps + per-module difficulty heatmap
-- [ ] Step 4: Verdict — GO / PARTIAL / NO-GO presented with evidence  ⛔ user gate
-- [ ] Step 5: Strategy — parity harness, migration pattern, coexistence bridge, rollback
-- [ ] Step 6: Assessment document written; roadmap phases sized for deep-plan
+- [ ] Step 4: Verdict — GO / PARTIAL / NO-GO as a 10–20 line brief  ⛔ user gate
+- [ ] Step 5: Strategy — parity harness, pattern, bridge, rollback, ONE-WAY tags
+- [ ] Step 6: Assessment document — skeleton-first roadmap, spikes for unknowns, pre-mortem risks
 - [ ] Step 7: Self-check + report
 ```
 
@@ -66,6 +66,14 @@ Pin down, before analyzing anything:
 - Constraints: team skills, downtime tolerance, budget/deadline, data that
   must not be re-migrated twice.
 - Non-goals: what explicitly stays as-is.
+- **Feasibility Questions** — a numbered list of what the verdict needs
+  answered ("does the target ecosystem cover the ORM?", "does the target
+  runtime actually serve the perf driver?", "is there a seam where old and
+  new can coexist?"). Steps 1–3 exist to answer this list: each finding
+  cites the question number it answers, questions discovered mid-census are
+  appended, and research is complete when every question is answered with
+  evidence or explicitly tagged `UNVERIFIED` — **not** when every file has
+  been read.
 - Identify which transformation type(s) apply — see
   [references/transformation-catalog.md](references/transformation-catalog.md);
   each type has its own extra checklist. Combinations (port AND SaaS-ify)
@@ -75,7 +83,7 @@ Pin down, before analyzing anything:
 
 Inventory the source repo (reuse the know-my-repo discipline if that skill
 is available; otherwise a deep read: structure, data flow, wiring, tests,
-git trajectory). On top of that, two censuses specific to migration:
+git trajectory). On top of that, three censuses specific to migration:
 
 1. **Dependency census** — every runtime dependency with its role and how
    deeply its API is woven in (call-site count).
@@ -83,6 +91,11 @@ git trajectory). On top of that, two censuses specific to migration:
    behavior: runtime model (e.g. PHP's request-per-process state reset),
    language constructs with no direct target equivalent, OS/FFI calls,
    framework magic, numeric/string/encoding semantics the code relies on.
+3. **Operational census** — deploy pipeline, environments, real data scale
+   (row counts, traffic — migrating 100 rows and 100M rows are different
+   plans), and background jobs (cron/queue) touching the paths that move.
+   Migrations fail on ops as often as on code; this census feeds the
+   coexistence bridge and cutover math in Step 5.
 
 Everything with `file:line`. Also record test coverage per module — it
 determines parity-harness cost in Step 5.
@@ -135,9 +148,18 @@ Apply the rubric and present, BEFORE designing anything further:
   different target). A NO-GO with evidence is a successful outcome of this
   skill, not a failure.
 
-Show the reasoning: dependency coverage stats, worst gaps, heatmap summary,
-estimated magnitude (S/M/L/XL per module group). **Stop and let the user
-decide.** Only continue to Step 5 on an accepted GO/PARTIAL.
+Present it as a **Verdict Brief** — 10–20 lines in chat, not a document:
+the verdict, dependency coverage stats, worst gaps, heatmap top rows,
+estimated magnitude (S/M/L/XL per module group), the three worth-it
+answers, and any feasibility question still `UNVERIFIED`. Ask for the
+decision **once**. **Stop and let the user decide.** Only continue to
+Step 5 on an accepted GO/PARTIAL.
+
+If the user cannot respond (headless/CI run), degrade honestly: on GO or
+PARTIAL, continue but tag the verdict `UNCONFIRMED — awaiting user` in the
+document's Verdict section; on NO-GO, write the assessment with the
+strategy and roadmap sections marked "not applicable — NO-GO" — designing
+a migration nobody approved is waste.
 
 ## Step 5 — Migration strategy
 
@@ -159,6 +181,13 @@ Design the safety net before the route:
 4. **Cutover and rollback:** per phase — shadow/dual-run with output
    diffing where feasible, feature flags, the exact rollback trigger and
    procedure. A phase without a rollback path is not a phase; it is a bet.
+5. **Classify every cutover action REVERSIBLE or ONE-WAY.** ONE-WAY =
+   undo cost rivals do cost: in-place/destructive data conversion,
+   decommissioning the old system, a cutover after which the two stores
+   diverge, a public API contract change. Each ONE-WAY action needs
+   explicit user confirmation before its phase runs — in headless runs,
+   carry it into the document marked `UNCONFIRMED`. REVERSIBLE actions
+   just need their rollback path named.
 
 ## Step 6 — Write the assessment document
 
@@ -169,11 +198,36 @@ where **each phase is sized to be one deep-plan run**, ordered by the
 heatmap (start with a low-risk, representative module to calibrate real
 cost — never the hardest one), each with parity gate + rollback point.
 
+Two roadmap non-negotiables:
+
+- **Phase 1 is a walking skeleton, not a code drop:** the calibrator
+  module runs **end-to-end in the target stack** — built, deployed through
+  the real pipeline, serving traffic through the actual coexistence
+  bridge. "Ported and unit-tested" parks the integration risk (build,
+  deploy, bridge, data) at the end of the migration, which is where
+  migrations die.
+- **Every `UNVERIFIED` tag and every `missing` census entry that survives
+  into the roadmap becomes a named, timeboxed spike task** placed FIRST in
+  the phase that depends on it (e.g. "Spike: prove <target lib> handles
+  <feature> — 1 day"). No unknown may sit silently under a migration phase.
+
 ## Step 7 — Self-check and report
 
 - Every target-ecosystem claim has URL + version. Every source claim has
   `file:line`. Zero "surely the target has this".
-- The verdict follows from the evidence shown, not from enthusiasm either way.
+- Every Step 0 feasibility question is answered with evidence or listed as
+  `UNVERIFIED` in the document — and every surviving `UNVERIFIED`/`missing`
+  entry has a named spike task first in the phase that depends on it.
+- The verdict follows from the evidence shown, not from enthusiasm either
+  way — and it was presented as a Verdict Brief (or, headless, tagged
+  `UNCONFIRMED`).
+- Every ONE-WAY cutover action is user-confirmed or marked `UNCONFIRMED`;
+  every REVERSIBLE action names its rollback path.
+- The risk register came from the pre-mortem — no risk that could be
+  pasted into a different migration's assessment unchanged.
+- Roadmap Phase 1 is a walking skeleton (deployed end-to-end through the
+  bridge), and the operational census (deploy, data scale, background
+  jobs) is reflected in the cutover plan.
 - The user could hand Phase 1 of the roadmap to deep-plan right now.
 - Report: verdict, top 3 hardest things (per the heatmap), missing
   equivalents, and the recommended first slice.

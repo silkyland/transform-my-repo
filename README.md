@@ -22,26 +22,33 @@ optimism with a census.
 
 1. **Frame** — source → target, the *driver* (why migrate — the verdict is
    only meaningful relative to it), constraints, transformation type(s).
-2. **Source census** — full inventory plus two migration-specific censuses:
-   every dependency (with call-site depth) and every platform coupling
-   (runtime semantics the code secretly relies on), all with `file:line`.
+2. **Source census** — full inventory plus three migration-specific
+   censuses: every dependency (with call-site depth), every platform
+   coupling (runtime semantics the code secretly relies on), and the
+   operational reality (deploy pipeline, data scale, background jobs —
+   migrations fail on ops as often as on code), all with `file:line`.
 3. **Target ground truth** — every census entry verified in the target
    ecosystem *now* (registry/docs, URL + version). "Surely Python has an
    equivalent" is not evidence. Missing equivalents are the headline finding.
 4. **Gap analysis + difficulty heatmap** — semantic gaps (typing,
    concurrency, numerics, error idioms) and a per-module difficulty ranking:
    the concrete answer to "what will be hard".
-5. **Verdict** ⛔ — **GO / PARTIAL / NO-GO** with the evidence shown, then
-   stops for the user's decision. A NO-GO names the cheaper alternative that
-   serves the driver — and counts as a successful outcome.
+5. **Verdict** ⛔ — **GO / PARTIAL / NO-GO** as a compact 10–20 line brief
+   with the evidence shown, then stops for the user's decision. A NO-GO
+   names the cheaper alternative that serves the driver — and counts as a
+   successful outcome.
 6. **Strategy** — behavioral parity harness first (golden-master tests pin
    current behavior before anything moves), then a decided migration
    pattern (strangler fig by default; big-bang must be proven unavoidable),
-   coexistence bridge, per-phase cutover and rollback.
+   coexistence bridge, per-phase cutover and rollback — with every cutover
+   action classified REVERSIBLE or ONE-WAY, and ONE-WAY actions requiring
+   explicit user confirmation.
 7. **Assessment document** — `docs/TRANSFORM.md`: verdict, censuses, heatmap,
-   strategy, and a phased roadmap where Phase 1 is a low-risk calibrator
-   module and every phase is sized to be one
-   [deep-plan](https://github.com/silkyland/deep-plan) run.
+   strategy, a pre-mortem risk register, and a phased roadmap where Phase 1
+   is a low-risk calibrator module delivered as a walking skeleton
+   (deployed end-to-end through the real coexistence bridge), every
+   surviving unknown becomes a named spike task, and every phase is sized
+   to be one [deep-plan](https://github.com/silkyland/deep-plan) run.
 
 ## Covered transformation types
 
