@@ -49,7 +49,7 @@ Transform Progress:
 - [ ] Step 2: Target ground truth — every dependency & mechanism verified in target ecosystem
 - [ ] Step 3: Gap analysis — semantic gaps + per-module difficulty heatmap
 - [ ] Step 4: Verdict — GO / PARTIAL / NO-GO as a 10–20 line brief  ⛔ user gate
-- [ ] Step 5: Strategy — parity harness, pattern, bridge, rollback, ONE-WAY tags
+- [ ] Step 5: Strategy — code + data parity, pattern, bridge, rollback, ONE-WAY tags, data migration plan, modernization sequenced separately
 - [ ] Step 6: Assessment document — skeleton-first roadmap, spikes for unknowns, pre-mortem risks
 - [ ] Step 7: Self-check + report
 ```
@@ -174,7 +174,9 @@ Design the safety net before the route:
    behavior: characterization/golden-master tests on the source for every
    module about to move, at its seams (HTTP responses, DB writes, file
    outputs). Untested behavior cannot be proven preserved — budget this
-   honestly; it is often the largest single line item.
+   honestly; it is often the largest single line item. This proves **code
+   parity**; **data parity** is a separate gate (item 6) — code that behaves
+   identically on top of silently corrupted data is not a successful migration.
 2. **Migration pattern — decide, don't menu:** default is **incremental
    with coexistence** (strangler fig at a routing/API seam,
    branch-by-abstraction, module-by-module with an interop bridge).
@@ -193,6 +195,46 @@ Design the safety net before the route:
    explicit user confirmation before its phase runs — in headless runs,
    carry it into the document marked `UNCONFIRMED`. REVERSIBLE actions
    just need their rollback path named.
+6. **Data migration plan — whenever the data's shape or owner changes, not
+   just on a database swap.** A language port, a SaaS-ification, or a
+   monolith split can all reshape or re-own data while the engine stays put.
+   Plan four things, each with `file:line`/schema evidence:
+   - **Field-level mapping** — old shape → new shape, column by column;
+     name every default, type coercion, and split/merge. A renamed or
+     restructured schema (see *Modernization vs. parity* below) makes this
+     mandatory, not optional.
+   - **Backfill & dirty-data handling** — legacy data almost never satisfies
+     the new constraints: bad encodings, orphaned rows, duplicates, values
+     that violate the target's types or NOT NULLs. Census the offenders and
+     decide per class (clean, quarantine, or reject) — silently dropping them
+     is data loss.
+   - **Move mechanism** — dump/restore vs dual-write vs CDC, chosen by
+     volume × allowable downtime (Type G in the catalog).
+   - **Reconciliation gate (data parity)** — the bulk check that proves the
+     move was faithful: row counts match, checksums/aggregates agree,
+     referential integrity holds, a sample diff is clean. This is distinct
+     from the code parity harness and MUST pass before an old store is
+     decommissioned. Name its rollback: how the source stays authoritative
+     until reconciliation is green.
+
+## Modernization vs. parity
+
+Legacy source is often a mess — vanilla code with SQL scattered across files,
+cryptic table/column names, dead branches. The temptation is to clean it up
+*while* porting. Resist: mixing cleanup into the port destroys parity-testing
+(you can no longer tell whether a behavior changed because of the port or the
+cleanup). The rule:
+
+- **Port to parity first**, carrying the mess faithfully; prove code + data
+  parity; then modernize as a **separate, deliberate phase** on the roadmap.
+- Following the **target's standards/idiom** is part of the port, not
+  optional cleanup (a port that fights the idiom fails review forever) — but
+  *cosmetic/structural* cleanup (renaming, re-layering, dead-code removal) is
+  the separate phase.
+- **Renaming schema/tables/columns uses expand-contract**, never a rename at
+  cutover: add the new name → backfill → dual-write both → switch readers →
+  drop the old name. Record every rename in a **rename map** so the data
+  migration plan (item 6) can map old rows to new shape.
 
 ## Step 6 — Write the assessment document
 
@@ -229,6 +271,12 @@ Two roadmap non-negotiables:
   `UNCONFIRMED`).
 - Every ONE-WAY cutover action is user-confirmed or marked `UNCONFIRMED`;
   every REVERSIBLE action names its rollback path.
+- If the data's shape or owner changes, the document has a data migration
+  plan (field mapping, dirty-data handling, move mechanism, reconciliation
+  gate) — not just a "migrate the data" bullet. Data parity (row
+  counts/checksums/integrity) is a named gate, separate from code parity.
+- Any cleanup/renaming is sequenced as its own phase AFTER parity, with a
+  rename map and expand-contract migrations — never folded into the port.
 - The risk register came from the pre-mortem — no risk that could be
   pasted into a different migration's assessment unchanged.
 - Roadmap Phase 1 is a walking skeleton (deployed end-to-end through the

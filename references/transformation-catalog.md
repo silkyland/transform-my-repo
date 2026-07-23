@@ -205,6 +205,20 @@ pattern were designed for the source engine's strengths. Extra checks:
 - **SQL→NoSQL is a redesign, not a migration:** model by access patterns,
   not by translating tables. Ad-hoc queries and reporting lose their home —
   where do they go (warehouse? kept relational?)?
+- **Naming & schema hygiene (only if the driver includes cleanup):** cryptic
+  names (`tbl_usr_x2`, `col_flg_1`), inconsistent conventions, and denormalized
+  legacy junk are worth fixing — but treat it as *modernization*, sequenced
+  AFTER a parity-faithful move, via **expand-contract** (add the new
+  name/shape → backfill → dual-write → switch readers → drop the old), never a
+  rename at cutover. Every rename goes in a **rename map** that the data
+  migration plan consumes to map old rows to the new shape. Renaming and
+  moving data in one destructive step is how a migration loses rows nobody can
+  get back.
+- **Dirty-data census:** the target's stricter types/constraints will reject
+  data the source tolerated — bad encodings, orphaned FKs, duplicates, nulls
+  where the new schema forbids them. Census the offender classes (`file:line`
+  of the query or column) and decide clean / quarantine / reject per class;
+  this feeds the backfill step and the reconciliation gate.
 
 **Feasibility profile:** same-paradigm engine swaps behind an ORM are
 usually GO and mostly S/M. Zero-downtime requirements push magnitude up one

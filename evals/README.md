@@ -22,3 +22,8 @@ still verified live; the keys assert only registry-stable outcomes.
 - `fixtures/io-bound-perf/` — an I/O-bound hot path someone wants to port to
   Rust for speed. Exercises the **worth-it test against the do-nothing
   baseline** → NO-GO as a success. (Scenario 3)
+- `fixtures/legacy-php-mess/` — vanilla PHP with scattered inline SQL, cryptic
+  table/column names, and dirty seed data. Exercises **modernization
+  sequenced after parity** (repository layer + expand-contract renames) and
+  the **data migration plan** (field mapping, dirty-data census,
+  reconciliation gate). (Scenario 4)
