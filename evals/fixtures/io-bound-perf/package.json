@@ -1,0 +1,7 @@
+{
+  "name": "io-bound-perf",
+  "version": "1.0.0",
+  "private": true,
+  "description": "I/O-bound service someone wants to port to Rust for speed — transform-my-repo eval fixture (NO-GO)",
+  "main": "src/report.js"
+}

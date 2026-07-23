@@ -1,0 +1,8 @@
+{
+  "name": "eval/php-to-go",
+  "description": "PHP app leaning on Twig and per-request state — transform-my-repo eval fixture",
+  "require": {
+    "php": ">=8.1",
+    "twig/twig": "^3.8"
+  }
+}

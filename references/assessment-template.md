@@ -4,6 +4,19 @@ Write to `docs/TRANSFORM.md` (or the user's chosen path). Every section
 required, in order. Tag claims per the family rules; source claims carry
 `file:line`, target-ecosystem claims carry URL + version.
 
+## Contents (the 10 required sections)
+
+1. Verdict — GO / PARTIAL / NO-GO tied to the driver
+2. Scope and constraints — source, target, transformation type(s), non-goals
+3. Dependency census & target coverage — with missing-equivalent headline
+4. Platform couplings and semantic gaps — what silently differs after a port
+5. Difficulty heatmap — ranked hardest-first per the rubric
+6. Parity harness plan — what pins current behavior before anything moves
+7. Migration strategy — pattern, bridge, cutover/rollback, ONE-WAY actions
+8. Phased roadmap — skeleton-first, one deep-plan run per phase
+9. Risk register — pre-mortem-generated, no generic entries
+10. Corrections & unverified — beliefs corrected + surviving UNVERIFIED items
+
 ---
 
 ```markdown

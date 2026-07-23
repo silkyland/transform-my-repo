@@ -113,10 +113,13 @@ Or copy this directory into your agent's skills folder
 ```
 transform-my-repo/
 ├── SKILL.md                              # 8-step workflow + the verdict gate
-└── references/
-    ├── transformation-catalog.md         # Type-specific checklists (port / SaaS / framework)
-    ├── feasibility-rubric.md             # Heatmap scoring + GO/PARTIAL/NO-GO rules
-    └── assessment-template.md            # docs/TRANSFORM.md structure
+├── references/
+│   ├── transformation-catalog.md         # Type-specific checklists (port / SaaS / framework)
+│   ├── feasibility-rubric.md             # Heatmap scoring + GO/PARTIAL/NO-GO rules
+│   └── assessment-template.md            # docs/TRANSFORM.md structure
+└── evals/
+    ├── scenarios.md                      # 3 manual eval scenarios (query + expected behavior)
+    └── fixtures/                         # Source repos with baked-in verdict answer keys
 ```
 
 Follows the [Vercel skills](https://github.com/vercel-labs/skills) single-skill

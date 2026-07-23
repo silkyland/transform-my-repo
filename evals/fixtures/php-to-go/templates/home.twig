@@ -1,0 +1,10 @@
+{# Twig template — the "missing equivalent" the census must flag.
+   Twig's syntax ({{ }}, {% %}, filters like |title) and its autoescaping
+   model do not map one-to-one onto Go's html/template. #}
+<!DOCTYPE html>
+<html>
+  <body>
+    <h1>{{ "widget shop"|title }}</h1>
+    <p>Requests this process: {{ count }}</p>
+  </body>
+</html>

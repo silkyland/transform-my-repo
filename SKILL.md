@@ -56,6 +56,11 @@ Transform Progress:
 
 ## Step 0 — Frame the transformation
 
+Use the arguments provided with the invocation (some platforms substitute
+them as `$ARGUMENTS` — `[source → target] [project-root] [driver/reason]`);
+otherwise infer from the repo and ask. Treat the given project-root as the
+source repo for every step; state which root you used in the report.
+
 Pin down, before analyzing anything:
 
 - **Source → target**, precisely (language+version, framework, deployment model).
