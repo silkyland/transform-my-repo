@@ -86,6 +86,9 @@ listed explicitly.
 - **Pattern:** <strangler fig / branch-by-abstraction / module-by-module / big-bang(justified)> — decided, not a menu.
 - **Coexistence bridge:** <how old and new run together; data consistency ownership>.
 - **Cutover & rollback:** per-phase triggers and procedures.
+- **Operational census:** the Step 1 facts land here — deploy pipeline,
+  data scale, background jobs — as bridge/cutover constraints in §7, move
+  volumes in §8, and phase constraints in §9.
 - **ONE-WAY actions:** every destructive or divergence-creating step
   (in-place data conversion, decommission, contract change) listed with
   its confirmation status: `confirmed` / `UNCONFIRMED`.

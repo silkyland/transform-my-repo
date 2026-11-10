@@ -3,9 +3,10 @@
 // Answer key: the stated driver is "port to Rust for speed." But this hot
 // path is I/O-BOUND — nearly all wall-clock time is spent awaiting the two
 // sequential database round-trips below, not burning CPU. A language port
-// cannot move a driver that a faster runtime doesn't serve; the do-nothing
-// baseline (fix the N+1 query, add an index, parallelize the awaits, cache)
-// buys the latency win at a fraction of the cost and risk.
+// cannot move a driver that a faster runtime doesn't serve; the
+// improve-in-place baseline (fix the N+1 query, add an index, parallelize
+// the awaits, cache) buys the latency win at a fraction of the cost and
+// risk, while do-nothing keeps paying the latency and its mounting costs.
 //
 // The correct transform-my-repo verdict is NO-GO, recommending those targeted
 // optimizations instead of a rewrite. A GO verdict here is a worth-it-test

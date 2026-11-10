@@ -35,7 +35,7 @@ optimism with a census.
    the concrete answer to "what will be hard".
 5. **Verdict** ⛔ — **GO / PARTIAL / NO-GO** as a compact 10–20 line brief
    with the evidence shown, weighed explicitly against BOTH non-migration
-   baselines — do-nothing and improve-the-existing-system — then stops for
+   baselines — do-nothing and improve-in-place — then stops for
    the user's decision. A NO-GO names the winning baseline or cheaper
    alternative — and counts as a successful outcome.
 6. **Strategy** — behavioral parity harness first (golden-master tests pin

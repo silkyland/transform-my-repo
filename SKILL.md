@@ -8,7 +8,7 @@ description: >-
   serverless re-hosting, sync to event-driven, REST to GraphQL/gRPC, UI
   platform shifts, standalone to SaaS, and vanilla to framework. Produces
   an evidence-based GO/PARTIAL/NO-GO verdict weighed against BOTH
-  non-migration baselines — do-nothing and improve-the-existing-system —
+  non-migration baselines — do-nothing and improve-in-place —
   from a dependency census verified in the target ecosystem, semantic gap
   analysis, and a per-module difficulty heatmap; then a migration roadmap
   with behavioral and data parity gates, a walking-skeleton start,
@@ -58,9 +58,8 @@ Transform Progress:
 
 Long runs: keep working state — the frame answers, each feasibility
 question's status, census rows, the gap list, and the verdict — in
-`.transform-my-repo/state.md` next to the assessment output (e.g.
-`docs/.transform-my-repo/state.md` for the default path), updated at each
-step exit. If that file exists when the skill is invoked, resume from it
+`docs/.transform-my-repo/state.md`, a fixed path regardless of where the
+assessment itself is written, updated at each step exit. If that file exists when the skill is invoked, resume from it
 instead of restarting. It is working memory, not a deliverable — do not
 commit it; offer to delete it once the assessment lands.
 
@@ -188,7 +187,9 @@ question still `UNVERIFIED`. The verdict follows from the cited evidence,
 not from any score or coverage figure; if the rubric's numbers and the
 evidence disagree, the evidence wins and the disagreement is stated. Ask
 for the decision **once**. **Stop and let the user decide.** Only
-continue to Step 5 on an accepted GO/PARTIAL.
+continue to Step 5 on an accepted GO/PARTIAL. An accepted NO-GO still
+writes the assessment — Step 6 with the strategy and roadmap sections
+marked "not applicable — NO-GO", same as the headless path.
 
 If the user cannot respond (headless/CI run), degrade honestly: on GO or
 PARTIAL, continue but tag the verdict `UNCONFIRMED — awaiting user` in the
