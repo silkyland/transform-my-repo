@@ -34,11 +34,14 @@ optimism with a census.
    concurrency, numerics, error idioms) and a per-module difficulty ranking:
    the concrete answer to "what will be hard".
 5. **Verdict** ⛔ — **GO / PARTIAL / NO-GO** as a compact 10–20 line brief
-   with the evidence shown, then stops for the user's decision. A NO-GO
-   names the cheaper alternative that serves the driver — and counts as a
-   successful outcome.
+   with the evidence shown, weighed explicitly against BOTH non-migration
+   baselines — do-nothing and improve-the-existing-system — then stops for
+   the user's decision. A NO-GO names the winning baseline or cheaper
+   alternative — and counts as a successful outcome.
 6. **Strategy** — behavioral parity harness first (golden-master tests pin
-   current behavior before anything moves), then a decided migration
+   current behavior before anything moves) plus a data parity plan
+   (field mapping, dirty-data handling, reconciliation gate — or an
+   evidenced "data does not move"), then a decided migration
    pattern (strangler fig by default; big-bang must be proven unavoidable),
    coexistence bridge, per-phase cutover and rollback — with every cutover
    action classified REVERSIBLE or ONE-WAY, and ONE-WAY actions requiring
@@ -72,9 +75,12 @@ from a blank page.
 
 And the question behind all of them — **"is it worth it?"** — gets an
 explicit break-even test in the verdict: the concrete benefit in the
-driver's own unit, the cheaper do-nothing alternative, and roughly when
-cumulative benefit passes the one-time cost. "We can migrate" and "we
-should" are different answers.
+driver's own unit, both non-migration baselines priced with evidence
+(do-nothing keeps paying the mounting costs; improve-in-place is the best
+targeted change to the existing system), and roughly when cumulative
+benefit passes the one-time cost. "We can migrate" and "we should" are
+different answers — and so is "here is the cheaper way to get what you
+actually want."
 
 Combined transformations (port **and** SaaS-ify) are sequenced, not stacked —
 a parity harness can't isolate which change broke behavior when both move at once.
@@ -88,11 +94,8 @@ a parity harness can't isolate which change broke behavior when both move at onc
 | [deep-plan-ingest](https://github.com/silkyland/deep-plan) | Distill an accepted plan into living knowledge files |
 | [clean-slate](https://github.com/silkyland/clean-slate) | Reset rotten knowledge files — backup-gated |
 | **transform-my-repo** | Change the architecture: migration feasibility + strategy |
-| [twin-my-site](https://github.com/silkyland/twin-my-site) | Extend the web product with a native mobile twin |
-| [jury-my-repo](https://github.com/silkyland/jury-my-repo) | Multi-agent adversarial audit with a verified verdict |
 | [love-me-love-my-docs](https://github.com/silkyland/love-me-love-my-docs) | A user manual that regenerates itself |
 | [seed-ah](https://github.com/silkyland/seed-ah) | Fake-but-production-like demo data with a manifest |
-| [create-my-team](https://github.com/silkyland/create-my-team) | Spawn and manage a subagent team for any mission |
 | [reproduce-my-bug](https://github.com/silkyland/reproduce-my-bug) | Prove the bug before anyone fixes it |
 
 Shared law: **no claim without evidence** — here on both sides of the
@@ -115,10 +118,10 @@ transform-my-repo/
 ├── SKILL.md                              # 8-step workflow + the verdict gate
 ├── references/
 │   ├── transformation-catalog.md         # Type-specific checklists (port / SaaS / framework)
-│   ├── feasibility-rubric.md             # Heatmap scoring + GO/PARTIAL/NO-GO rules
+│   ├── feasibility-rubric.md             # Heatmap ranking + worth-it test + verdict rules (evidence, not score cutoffs)
 │   └── assessment-template.md            # docs/TRANSFORM.md structure
 └── evals/
-    ├── scenarios.md                      # 3 manual eval scenarios (query + expected behavior)
+    ├── scenarios.md                      # 4 manual eval scenarios (query + expected behavior)
     └── fixtures/                         # Source repos with baked-in verdict answer keys
 ```
 

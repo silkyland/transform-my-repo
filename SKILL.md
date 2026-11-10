@@ -7,11 +7,13 @@ description: >-
   monolith to microservices and back, database migrations, cloud/container/
   serverless re-hosting, sync to event-driven, REST to GraphQL/gRPC, UI
   platform shifts, standalone to SaaS, and vanilla to framework. Produces
-  an evidence-based GO/PARTIAL/NO-GO verdict with a worth-it test against
-  the do-nothing baseline (dependency census verified in the target
-  ecosystem, semantic gap analysis, per-module difficulty heatmap), then a
-  migration roadmap with behavioral parity gates and rollback points.
-  Allowed to recommend NOT migrating. Use when the user asks to migrate,
+  an evidence-based GO/PARTIAL/NO-GO verdict weighed against BOTH
+  non-migration baselines — do-nothing and improve-the-existing-system —
+  from a dependency census verified in the target ecosystem, semantic gap
+  analysis, and a per-module difficulty heatmap; then a migration roadmap
+  with behavioral and data parity gates, a walking-skeleton start,
+  coexistence/cutover, and rollback points. A well-argued NO-GO is a
+  successful outcome. Use when the user asks to migrate,
   port, rewrite, re-platform, upgrade a major version, split or merge
   services, switch databases or API paradigms, asks whether a migration is
   worth it, or mentions transform-my-repo or /transform-my-repo.
@@ -48,18 +50,28 @@ Transform Progress:
 - [ ] Step 1: Source census — inventory + dependency, platform-coupling, operational censuses
 - [ ] Step 2: Target ground truth — every dependency & mechanism verified in target ecosystem
 - [ ] Step 3: Gap analysis — semantic gaps + per-module difficulty heatmap
-- [ ] Step 4: Verdict — GO / PARTIAL / NO-GO as a 10–20 line brief  ⛔ user gate
-- [ ] Step 5: Strategy — code + data parity, pattern, bridge, rollback, ONE-WAY tags, data migration plan, modernization sequenced separately
+- [ ] Step 4: Verdict — GO / PARTIAL / NO-GO brief weighed against both baselines  ⛔ user gate
+- [ ] Step 5: Strategy — behavioral + data parity (both always addressed), pattern, bridge, cutover/rollback, ONE-WAY tags, data migration plan, modernization sequenced separately
 - [ ] Step 6: Assessment document — skeleton-first roadmap, spikes for unknowns, pre-mortem risks
 - [ ] Step 7: Self-check + report
 ```
+
+Long runs: keep working state — the frame answers, each feasibility
+question's status, census rows, the gap list, and the verdict — in
+`.transform-my-repo/state.md` next to the assessment output (e.g.
+`docs/.transform-my-repo/state.md` for the default path), updated at each
+step exit. If that file exists when the skill is invoked, resume from it
+instead of restarting. It is working memory, not a deliverable — do not
+commit it; offer to delete it once the assessment lands.
 
 ## Step 0 — Frame the transformation
 
 Use the arguments provided with the invocation (some platforms substitute
 them as `$ARGUMENTS` — `[source → target] [project-root] [driver/reason]`);
-otherwise infer from the repo and ask. Treat the given project-root as the
-source repo for every step; state which root you used in the report.
+otherwise infer from the repo and ask — batch the questions, each with
+your recommended answer; ask only what changes the outcome. Treat the
+given project-root as the source repo for every step; state which root
+you used in the report.
 
 Pin down, before analyzing anything:
 
@@ -71,6 +83,11 @@ Pin down, before analyzing anything:
 - Constraints: team skills, downtime tolerance, budget/deadline, data that
   must not be re-migrated twice.
 - Non-goals: what explicitly stays as-is.
+- **The baselines** — sketch now, argue properly in Step 4: (a) *do
+  nothing* — status quo, the driver stays unserved and its costs keep
+  mounting; (b) *improve in place* — the best targeted change to the
+  existing system that could serve the driver. The verdict must beat both
+  on the driver's own terms, with evidence.
 - **Feasibility Questions** — a numbered list of what the verdict needs
   answered ("does the target ecosystem cover the ORM?", "does the target
   runtime actually serve the perf driver?", "is there a seam where old and
@@ -83,6 +100,10 @@ Pin down, before analyzing anything:
   [references/transformation-catalog.md](references/transformation-catalog.md);
   each type has its own extra checklist. Combinations (port AND SaaS-ify)
   multiply risk: recommend sequencing them, not doing both at once.
+
+Scale the depth to the task: a small repo or a narrow change can collapse
+Steps 1–3 into a single pass, but the evidence rules and the Step 4
+verdict gate never relax.
 
 ## Step 1 — Source census
 
@@ -140,25 +161,34 @@ Rules:
   [references/feasibility-rubric.md](references/feasibility-rubric.md)
   (size, dependency density, platform coupling, test coverage, churn).
   Output a ranked table — this answers "what will be hard" concretely and
-  later dictates migration order.
+  later dictates migration order. The score ranks modules against each
+  other; it is not an input to the verdict.
 
 ## Step 4 — The verdict ⛔
 
 Apply the rubric and present, BEFORE designing anything further:
 
-- **GO** — coverage and gaps manageable; expected cost proportionate to the driver.
+- **GO** — no blockers; every census gap has a handling; the worth-it
+  test shows migration beating BOTH baselines for this driver; a viable
+  low-risk first slice exists; expected cost proportionate to the driver.
 - **PARTIAL** — migrate these modules, keep/bridge those; say which and why.
-- **NO-GO** — the evidence says the driver is better served another way;
-  name the alternative (targeted refactor, optimization, extraction,
-  different target). A NO-GO with evidence is a successful outcome of this
-  skill, not a failure.
+  Also the right verdict when only a subsystem serves the driver.
+- **NO-GO** — blockers touch the core, or a baseline wins: name WHICH one
+  (do-nothing or improve-in-place) and the evidence it serves the driver
+  better — targeted refactor, optimization, extraction, staying on the
+  current stack, or a different target. A NO-GO with evidence is a
+  successful outcome of this skill, not a failure.
 
 Present it as a **Verdict Brief** — 10–20 lines in chat, not a document:
 the verdict, dependency coverage stats, worst gaps, heatmap top rows,
-estimated magnitude (S/M/L/XL per module group), the three worth-it
-answers, and any feasibility question still `UNVERIFIED`. Ask for the
-decision **once**. **Stop and let the user decide.** Only continue to
-Step 5 on an accepted GO/PARTIAL.
+estimated magnitude (S/M/L/XL per module group), the worth-it answers —
+including the explicit comparison against BOTH baselines (do-nothing and
+improve-in-place), each argued with evidence — and any feasibility
+question still `UNVERIFIED`. The verdict follows from the cited evidence,
+not from any score or coverage figure; if the rubric's numbers and the
+evidence disagree, the evidence wins and the disagreement is stated. Ask
+for the decision **once**. **Stop and let the user decide.** Only
+continue to Step 5 on an accepted GO/PARTIAL.
 
 If the user cannot respond (headless/CI run), degrade honestly: on GO or
 PARTIAL, continue but tag the verdict `UNCONFIRMED — awaiting user` in the
@@ -168,7 +198,10 @@ a migration nobody approved is waste.
 
 ## Step 5 — Migration strategy
 
-Design the safety net before the route:
+Design the safety net before the route. Two parity questions are always
+answered, never optional: **behavioral parity** (item 1 — what proves the
+ported code behaves the same) and **data parity** (item 6 — the plan when
+data moves, an evidenced "data does not move" when it doesn't).
 
 1. **Behavioral parity harness first.** Before any porting, pin current
    behavior: characterization/golden-master tests on the source for every
@@ -195,10 +228,14 @@ Design the safety net before the route:
    explicit user confirmation before its phase runs — in headless runs,
    carry it into the document marked `UNCONFIRMED`. REVERSIBLE actions
    just need their rollback path named.
-6. **Data migration plan — whenever the data's shape or owner changes, not
-   just on a database swap.** A language port, a SaaS-ification, or a
-   monolith split can all reshape or re-own data while the engine stays put.
-   Plan four things, each with `file:line`/schema evidence:
+6. **Data migration plan — the data-parity answer, always.** Whenever the
+   data's shape or owner changes — not just on a database swap: a language
+   port, a SaaS-ification, or a monolith split can all reshape or re-own
+   data while the engine stays put — the full plan below is mandatory.
+   When the data genuinely does not move (engine, shape, and owner all
+   unchanged — verified against the census, not assumed), the assessment
+   records that with what was checked instead of a plan. When it does
+   move, plan four things, each with `file:line`/schema evidence:
    - **Field-level mapping** — old shape → new shape, column by column;
      name every default, type coercion, and split/merge. A renamed or
      restructured schema (see *Modernization vs. parity* below) makes this
@@ -243,7 +280,8 @@ Write to `docs/TRANSFORM.md` (or user-chosen path) following
 verdict + evidence, censuses, gaps, heatmap, strategy, and a phased roadmap
 where **each phase is sized to be one deep-plan run**, ordered by the
 heatmap (start with a low-risk, representative module to calibrate real
-cost — never the hardest one), each with parity gate + rollback point.
+cost — never the hardest one), each with parity gate (behavioral; plus
+the data reconciliation gate where the phase moves data) + rollback point.
 
 Two roadmap non-negotiables:
 
@@ -262,13 +300,18 @@ Two roadmap non-negotiables:
 
 - Every target-ecosystem claim has URL + version. Every source claim has
   `file:line`. Zero "surely the target has this" — grep the document for
-  `UNVERIFIED` and verify the count matches section 10.
+  `UNVERIFIED` and verify the count matches section 11.
 - Every Step 0 feasibility question is answered with evidence or listed as
   `UNVERIFIED` in the document — and every surviving `UNVERIFIED`/`missing`
   entry has a named spike task first in the phase that depends on it.
 - The verdict follows from the evidence shown, not from enthusiasm either
-  way — and it was presented as a Verdict Brief (or, headless, tagged
-  `UNCONFIRMED`).
+  way and not from any score or coverage figure — and it was presented as
+  a Verdict Brief (or, headless, tagged `UNCONFIRMED`). Its reasoning names
+  BOTH non-migration baselines — do-nothing and improve-in-place — each
+  argued with evidence, not against a strawman.
+- Behavioral parity (the harness) and data parity (the section 8 plan, or
+  an evidenced "data does not move") are both addressed explicitly —
+  neither section is silently absent.
 - Every ONE-WAY cutover action is user-confirmed or marked `UNCONFIRMED`;
   every REVERSIBLE action names its rollback path.
 - If the data's shape or owner changes, the document has a data migration
@@ -279,6 +322,9 @@ Two roadmap non-negotiables:
   rename map and expand-contract migrations — never folded into the port.
 - The risk register came from the pre-mortem — no risk that could be
   pasted into a different migration's assessment unchanged.
+- Section 11 lists corrections that actually happened — or "none" plus
+  what was checked, so an empty ledger is distinguishable from an
+  unexamined one. Nothing was manufactured to fill it.
 - Roadmap Phase 1 is a walking skeleton (deployed end-to-end through the
   bridge), and the operational census (deploy, data scale, background
   jobs) is reflected in the cutover plan.
@@ -293,6 +339,6 @@ Two roadmap non-negotiables:
 | Target ecosystem unreachable (no web access) | Degrade honestly (Step 2): verify what local evidence allows (installed toolchains, lockfiles, vendored source, offline docs), tag everything else `UNVERIFIED — needs web check`, state plainly verdict is provisional. Never fill Evidence column from memory. |
 | Dependency has no target equivalent and no acceptable workaround | Missing entry becomes headline finding (Step 2). Realistic options: write it yourself (estimate), keep sidecar in source language, change approach, or verdict-blocker. If blocker touches core → NO-GO. |
 | User cannot respond to Verdict Brief (headless/CI run) | Degrade honestly (Step 4): on GO/PARTIAL continue but tag verdict `UNCONFIRMED — awaiting user` in document; on NO-GO write assessment with strategy/roadmap marked "not applicable — NO-GO". Never design migration nobody approved. |
-| Feasibility question remains unanswered after Step 3 | Tag `UNVERIFIED` explicitly (Step 0 rule), list in document section 10, create named timeboxed spike task FIRST in the phase that depends on it (Step 6). No unknown may sit silently under a migration phase. |
+| Feasibility question remains unanswered after Step 3 | Tag `UNVERIFIED` explicitly (Step 0 rule), list in document section 11, create named timeboxed spike task FIRST in the phase that depends on it (Step 6). No unknown may sit silently under a migration phase. |
 | ONE-WAY cutover action needed but user unavailable for confirmation | Mark `UNCONFIRMED` in document (Step 5). Carry into roadmap phase with confirmation status visible. Never execute destructive action without explicit user sign-off. |
 | Migration stalls at 60%, both stacks running forever | Classic risk — gets explicit trigger and answer in risk register (Step 6). Define DONE criterion up front (e.g. "no direct mysqli_query outside repository layer"); strangler must finish strangling. |

@@ -20,8 +20,8 @@ still verified live; the keys assert only registry-stable outcomes.
   per-request global state. Exercises the **missing-equivalent headline** and
   the **platform-coupling census** → PARTIAL/NO-GO. (Scenario 2)
 - `fixtures/io-bound-perf/` — an I/O-bound hot path someone wants to port to
-  Rust for speed. Exercises the **worth-it test against the do-nothing
-  baseline** → NO-GO as a success. (Scenario 3)
+  Rust for speed. Exercises the **worth-it test against both non-migration
+  baselines** → NO-GO naming improve-in-place as the winner. (Scenario 3)
 - `fixtures/legacy-php-mess/` — vanilla PHP with scattered inline SQL, cryptic
   table/column names, and dirty seed data. Exercises **modernization
   sequenced after parity** (repository layer + expand-contract renames) and

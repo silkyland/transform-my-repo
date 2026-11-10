@@ -1,8 +1,9 @@
 # Feasibility Rubric
 
-Turns the censuses into a defensible verdict and a difficulty heatmap.
-Scores guide judgment; they do not replace it — always show the underlying
-evidence next to the number.
+Structures the analysis; it does not decide it. Scores and coverage
+figures organize evidence so a reader can see its shape — the verdict
+follows from the cited findings, never from a number crossing a line.
+Always show the underlying evidence next to the number.
 
 ## Per-module difficulty heatmap
 
@@ -18,23 +19,46 @@ Score each module 0–2 on five factors; sum = difficulty 0–10:
 
 Output: table ranked hardest-first, each row with its worst factor named.
 The **"what's hard" answer** = the top rows + every census entry marked
-`missing`.
+`missing`. The sum ranks modules against each other — it orders the
+roadmap and calibrates effort; it is not an input to the verdict. A
+low-scoring module can still be un-migratable if its one dependency is
+missing, and a high-scoring one can be fine if every gap has a cheap
+handling.
 
 ## The worth-it test (break-even)
 
 Difficulty says what the migration costs; this says whether it buys
-anything. Answer all three before the verdict — against the **do-nothing
-baseline** (keep the current stack, spend the same effort improving it):
+anything — and against what. A migration is justified only if it beats
+BOTH non-migration baselines on the driver's own terms. Name and argue
+both explicitly; they are different options, not one:
+
+- **Do-nothing baseline** — keep the current stack exactly as-is. Price
+  it honestly: the driver stays unserved, and the census's mounting costs
+  keep accruing (EOL/security exposure, shrinking hiring pool, license
+  fees, the scaling ceiling the operational census found). Do-nothing is
+  a real option with a real price — the verdict must price it, not assume
+  it is free.
+- **Improve-in-place baseline** — the best targeted change to the
+  EXISTING system that could serve the driver: fix the hot path, extract
+  the slow module, adopt the one missing library, incremental framework
+  adoption, a bounded refactor. Ground it in what the census actually
+  found broken or missing, and give it a rough magnitude. This is usually
+  the strongest competitor to a migration — argue against it specifically,
+  not against a strawman. If a baseline cannot serve the driver at all
+  (a hard constraint — licensing, platform mandate, a partner requirement
+  the current stack can never meet), say so with the evidence; that
+  removes it as a competitor rather than ignoring it.
+
+Then answer, before the verdict:
 
 1. **What does the driver gain, concretely?** Name the benefit in the
    driver's own unit: "SSR fixes the SEO/TTFB problem on these 12 routes",
    "hiring pool: N× more candidates locally", "removes the license fee".
    "More modern" is not a unit. If the benefit can't be named, the verdict
    is NO-GO by default.
-2. **Could the driver be served WITHOUT migrating, cheaper?** e.g. SEO via
-   prerendering on the current stack; performance via profiling the hot
-   path; one painful module extracted instead of a full port. If yes and
-   the user hasn't rejected it, that alternative IS the recommendation.
+2. **What does each baseline deliver for the driver, at what cost?** The
+   do-nothing price and the improve-in-place option, both argued above —
+   restated here as the comparison the verdict actually makes.
 3. **Where is break-even?** Benefit is usually per-month (velocity, infra
    cost, conversions); cost is one-time (heatmap total) plus any new
    running cost the target adds (e.g. SPA-on-CDN → server runtime you now
@@ -43,29 +67,36 @@ baseline** (keep the current stack, spend the same effort improving it):
    when the migration is technically easy.
 
 Write the three answers into the verdict section — they are the difference
-between "we can migrate" and "we should".
+between "we can migrate", "we should", and "here is the cheaper way to get
+what you actually want".
 
 ## Verdict rules
 
-Compute first:
+Compute and REPORT first — these are evidence, not thresholds:
 
 - **Dependency coverage** = full / (full+partial+missing), weighted by
-  call-site count (a missing lib used in 2 places ≠ missing ORM).
+  call-site count (a missing lib used in 2 places ≠ missing ORM). Report
+  the figure and the list behind it so the reader sees the shape of the
+  gap. No percentage gates the verdict: what matters is WHICH entries are
+  missing and whether each has an acceptable handling.
 - **Blockers** = missing equivalents with no acceptable option, semantic
   gaps with no test-or-handle plan, or a driver the target provably does
   not serve (e.g. the perf driver, unbenchmarked).
 
-Then:
+Then reason from the evidence:
 
-- **GO** — no blockers; weighted coverage ≥ ~80%; heatmap has a viable
-  low-risk first slice; cost magnitude proportionate to the driver.
+- **GO** — no blockers; every census gap has a handling; the worth-it
+  test shows migration beating BOTH baselines for this driver; the
+  heatmap has a viable low-risk first slice; cost magnitude proportionate
+  to the driver.
 - **PARTIAL** — blockers are confined to specific modules: migrate the
   rest, bridge or keep the blocked parts (name them and the bridge).
   Also the right verdict when only a subsystem serves the driver.
-- **NO-GO** — blockers touch the core, or the driver is served cheaper
-  another way. A NO-GO must name the alternative: targeted refactor,
-  optimization of the hot path, extracting one service, or a different
-  target stack — with the evidence that it serves the driver.
+- **NO-GO** — blockers touch the core, or a baseline wins: name WHICH one
+  (do-nothing or improve-in-place) and the alternative it represents —
+  targeted refactor, optimization of the hot path, extracting one
+  service, staying on the current stack, or a different target stack —
+  with the evidence that it serves the driver better.
 
 ## Magnitude estimate
 
@@ -77,8 +108,12 @@ re-rate the rest of the heatmap before committing to the full roadmap.
 
 ## Honesty clauses
 
-- If coverage math and your gut disagree, say so and explain — the rubric
-  is evidence-shaped, not oracle-shaped.
+- If the coverage figure and the evidence disagree — high coverage but the
+  driver unserved, low coverage but the missing piece irrelevant to the
+  driver — say so and explain. No score or percentage overrides a finding,
+  in either direction.
+- A verdict that would flip if you re-ran the arithmetic but not if you
+  re-read the evidence is a failed verdict: argue from the findings.
 - Never let the driver's urgency inflate the verdict; the verdict protects
   the driver by being true.
 - "The team wants to" is a valid driver — but record it as the driver, so

@@ -6,14 +6,16 @@ required, in order. Tag claims per the family rules; source claims carry
 
 ## Contents (the 11 required sections)
 
-1. Verdict — GO / PARTIAL / NO-GO tied to the driver
+1. Verdict — GO / PARTIAL / NO-GO tied to the driver, argued against both
+   non-migration baselines
 2. Scope and constraints — source, target, transformation type(s), non-goals
 3. Dependency census & target coverage — with missing-equivalent headline
 4. Platform couplings and semantic gaps — what silently differs after a port
 5. Difficulty heatmap — ranked hardest-first per the rubric
-6. Code parity harness plan — what pins current behavior before anything moves
+6. Behavioral parity harness plan — what pins current behavior before anything moves
 7. Migration strategy — pattern, bridge, cutover/rollback, ONE-WAY actions
-8. Data migration plan — field mapping, dirty-data handling, reconciliation gate
+8. Data parity plan — field mapping, dirty-data handling, reconciliation gate
+   (or an evidenced "data does not move")
 9. Phased roadmap — skeleton-first, one deep-plan run per phase
 10. Risk register — pre-mortem-generated, no generic entries
 11. Corrections & unverified — beliefs corrected + surviving UNVERIFIED items
@@ -30,8 +32,17 @@ required, in order. Tag claims per the family rules; source claims carry
 **GO / PARTIAL / NO-GO** — <two-line justification tied to the driver>.
 
 <For PARTIAL: exactly what migrates and what stays/bridges.
-For NO-GO: the recommended alternative and its evidence.
+For NO-GO: the winning baseline or alternative and its evidence.
 Headless runs: tag the verdict `UNCONFIRMED — awaiting user` here.>
+
+The justification must show the migration weighed against BOTH
+non-migration baselines — **do-nothing** (status quo: driver unserved,
+mounting costs accruing — priced, not assumed free) and
+**improve-in-place** (the best targeted change to the existing system that
+could serve the driver — grounded in the census, with a rough magnitude).
+"Migration is feasible" alone is not a verdict; neither is a coverage
+percentage. If a baseline cannot serve the driver at all, say so with the
+evidence.
 
 ## 2. Scope and constraints
 
@@ -53,18 +64,22 @@ constraints, non-goals. If combined types: the chosen sequencing and why.
 
 ## 5. Difficulty heatmap
 
-Ranked hardest-first, per the rubric. Worst factor named per row.
+Ranked hardest-first, per the rubric. Worst factor named per row. The
+score ranks modules and orders the roadmap — it is not an input to the
+verdict.
 
 | Module | Size | Deps | Coupling | Tests | Churn | Total | Worst factor |
 
 **What will be hard:** <prose summary of the top rows — the honest answer.>
 
-## 6. Code parity harness plan
+## 6. Behavioral parity harness plan
 
-What pins current behavior before anything moves: which seams
+Required for every migration — this is the behavioral-parity gate (what
+the ported code does); data parity is §8. What pins current behavior
+before anything moves: which seams
 (HTTP/DB/files), which modules need characterization tests written first,
 estimated share of total effort. Modules with no seam get one built —
-listed explicitly. (This proves *code* parity; *data* parity is §8.)
+listed explicitly.
 
 ## 7. Migration strategy
 
@@ -75,11 +90,15 @@ listed explicitly. (This proves *code* parity; *data* parity is §8.)
   (in-place data conversion, decommission, contract change) listed with
   its confirmation status: `confirmed` / `UNCONFIRMED`.
 
-## 8. Data migration plan
+## 8. Data parity plan
 
-Required whenever the data's shape or owner changes — a language port,
-SaaS-ification, or service split, not only a database swap. Omit only if the
-data store is genuinely untouched (say so explicitly).
+Always present — the data-parity answer is never optional. When the
+data's shape or owner changes — a language port, SaaS-ification, or
+service split, not only a database swap — this section holds the full
+plan below. When the data genuinely does not move (engine, shape, and
+owner all unchanged — verified against the census, not assumed), the
+section says so explicitly with what was checked. Never omit the section
+silently.
 
 **Field mapping** — source shape → target shape, with every rename, split,
 merge, type coercion, and default. Every rename traces to the rename map.
@@ -115,7 +134,8 @@ Each phase sized for one deep-plan run:
 - **Spikes first:** <named, timeboxed spike per UNVERIFIED/missing entry
   this phase depends on — omit only if none>
 - **Scope:** concrete modules/files
-- **Parity gate:** <the tests/diff that must be green to call it done>
+- **Parity gate:** <the tests/diff that must be green to call it done —
+  behavioral; plus the §8 reconciliation gate where the phase moves data>
 - **Rollback point:** <how to back out; ONE-WAY steps flagged with
   confirmation status>
 - **Next:** run deep-plan on this phase for the implementation plan
@@ -132,9 +152,11 @@ explicit trigger and answer.
 
 ## 11. Corrections & unverified
 
-Beliefs corrected during analysis (mandatory — an assessment that never
-found itself wrong didn't check), and anything still UNVERIFIED with what
-would verify it (e.g. "target perf claim — needs the Phase 1 spike").
+Beliefs corrected during analysis — or `none`, with what was checked so
+an empty ledger is distinguishable from an unexamined one. Do not
+manufacture a correction to fill the section. Then anything still
+UNVERIFIED with what would verify it (e.g. "target perf claim — needs the
+Phase 1 spike").
 ```
 
 ---
@@ -142,16 +164,20 @@ would verify it (e.g. "target perf claim — needs the Phase 1 spike").
 ## Quality bar
 
 - The verdict section alone convinces a skeptical CTO, because every number
-  in it is traceable to sections 3–5.
+  in it is traceable to sections 3–5 — and it shows the migration weighed
+  against BOTH non-migration baselines (do-nothing, improve-in-place),
+  each with evidence. No score or coverage percentage is the verdict's
+  basis.
 - Phase 1 can be handed to deep-plan today — and it ends with the
   calibrator serving traffic through the bridge, not sitting in a branch.
 - Every UNVERIFIED/missing entry in section 11 reappears as a named spike
   in section 9; every ONE-WAY step in sections 7–9 carries a confirmation
   status.
-- If the data's shape or owner changed, section 8 exists with a field
-  mapping, dirty-data decisions, and a reconciliation gate — not a bare
-  "migrate the data" line — and no source store is decommissioned before
-  that gate is green.
+- Section 6 (behavioral parity) is always present; section 8 (data
+  parity) is always present — a full field-mapping/dirty-data/
+  reconciliation plan where data moves, an evidenced "data does not move"
+  where it doesn't — and no source store is decommissioned before that
+  gate is green.
 - No row of section 10 could be pasted into a different migration's
   assessment unchanged.
 - The "what will be hard" prose matches the heatmap — no smoothing.

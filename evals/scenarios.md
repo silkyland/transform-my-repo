@@ -11,6 +11,19 @@ its code comments — grading is comparing the verdict and censuses against
 that key. Target-ecosystem facts must still be verified live (registry/docs);
 the keys below name only outcomes that are stable regardless of registry drift.
 
+Contract checks that apply to EVERY scenario:
+
+- The verdict follows from cited evidence, not from any score or coverage
+  percentage — a run that arrives at GO/PARTIAL/NO-GO by arithmetic rather
+  than reasoning fails.
+- The verdict reasoning names BOTH non-migration baselines explicitly —
+  do-nothing (status quo, priced honestly) and improve-in-place (the best
+  targeted change to the existing system) — argued with evidence, not
+  against a strawman.
+- Data parity is always addressed: a full plan where data moves, an
+  evidenced "data does not move" where it doesn't — never a silently
+  absent section.
+
 ## Scenario 1 — same-ecosystem port, everything covered → GO
 
 - **Fixture:** `fixtures/flask-to-fastapi/`
@@ -22,6 +35,13 @@ the keys below name only outcomes that are stable regardless of registry drift.
     `/rate` outbound call), handled by making handlers `async` with httpx.
   - Verdict is **GO**, with difficulty not inflated — a same-language
     framework swap is not scored as an XL rewrite.
+  - The verdict reasoning names both baselines: do-nothing (stay on Flask —
+    the async-throughput driver stays unserved) and improve-in-place (e.g.
+    run Flask under an async server / add workers) — and shows migration
+    beating them on the driver's own terms, not by default.
+  - Data parity is addressed explicitly: the fixture has no data store, so
+    the assessment states "data does not move" with what was checked — not
+    a silently absent section.
 
 ## Scenario 2 — missing equivalent + platform coupling → PARTIAL/NO-GO
 
@@ -36,7 +56,11 @@ the keys below name only outcomes that are stable regardless of registry drift.
     (`index.php`) as PHP request-per-process state that Go's long-lived
     process would persist and race — cited at file:line.
   - Verdict is **PARTIAL or NO-GO** with those two as headline findings, not
-    a blanket GO.
+    a blanket GO — and the reasoning names which baseline wins or stays
+    competitive (e.g. improve-in-place: keep PHP, rewrite the Twig views
+    or the single entry point; do-nothing priced honestly).
+  - Data parity is addressed explicitly: the fixture has no data store, so
+    the assessment states "data does not move" with what was checked.
 
 ## Scenario 3 — driver not served by the migration → NO-GO
 
@@ -45,11 +69,15 @@ the keys below name only outcomes that are stable regardless of registry drift.
 - **Expected behavior:**
   - The analysis recognizes `src/report.js`'s hot path is **I/O-bound**
     (two sequential DB round-trips + an N+1 loop; trivial CPU work).
-  - The worth-it test against the do-nothing baseline concludes a language
-    port won't move a latency driver dominated by network waits.
-  - Verdict is **NO-GO**, recommending the cheaper alternative (fix the N+1,
-    add an index, parallelize the awaits, cache) — and this is scored as a
-    successful outcome, not a failure to migrate.
+  - The worth-it test concludes a language port won't move a latency driver
+    dominated by network waits — and names **improve-in-place** as the
+    winning baseline: the concrete cheaper alternative (fix the N+1,
+    add an index, parallelize the awaits, cache) argued with evidence,
+    versus do-nothing priced honestly (the latency stays).
+  - Verdict is **NO-GO** — and this is scored as a successful outcome, not
+    a failure to migrate.
+  - Data parity is addressed explicitly: the database does not move, so
+    the assessment states that with what was checked.
 
 ## Scenario 4 — legacy mess: modernization + data migration plan
 
@@ -71,3 +99,7 @@ the keys below name only outcomes that are stable regardless of registry drift.
     orphaned FK), a move mechanism, and a **reconciliation gate** (row
     counts/checksums/integrity) that must pass before the old store is
     decommissioned — not a bare "migrate the data" bullet.
+  - The verdict reasoning compares migration against improve-in-place
+    explicitly — e.g. adopting a framework / adding the repository layer
+    on the existing stack versus a full port — rather than only against
+    do-nothing.
